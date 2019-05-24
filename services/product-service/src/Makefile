@@ -9,13 +9,12 @@ all: run
 # $ make publish version=1.0.0
 
 name = ecs-refarch-cloudformation/product-service
-registry = 275396840892.dkr.ecr.us-east-1.amazonaws.com
+registry = 713541911133.dkr.ecr.us-east-1.amazonaws.com
 version ?= latest
 
 binary:
 	$(call blue, "Building Linux binary ready for containerisation...")
-	docker run --rm -it -v "${GOPATH}":/gopath -v "$(CURDIR)":/app -e "GOPATH=/gopath" -w /app golang:1.7 sh -c 'CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o app'
-
+	docker run --rm -it -v "${GOPATH}":/gopath -v "$(CURDIR)":/app -e "GOPATH=/gopath" -w /app golang:1.10 sh -c 'go get -u -v github.com/gin-gonic/gin && CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o app'
 image: binary
 	$(call blue, "Building docker image...")
 	docker build -t ${name}:${version} .
@@ -23,15 +22,15 @@ image: binary
 
 run: image
 	$(call blue, "Running Docker image locally...")
-	docker run -i -t --rm -p 8001:8001 ${name}:${version} 
+	docker run -i -t --rm -p 8001:8001 ${name}:${version}
 
-publish:  
+publish:
 	$(call blue, "Publishing Docker image to registry...")
 	docker tag ${name}:latest ${registry}/${name}:${version}
-	docker push ${registry}/${name}:${version} 
+	docker push ${registry}/${name}:${version}
 
-clean: 
-	@rm -f app 
+clean:
+	@rm -f app
 
 define blue
 	@tput setaf 6

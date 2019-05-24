@@ -8,13 +8,13 @@ all: run
 # or to publish the :latest version to the specified registry as :1.0.0, run:
 # $ make publish version=1.0.0
 
-name = ecs-refarch-cloudformation/website-service
+name = ecs-refarch-cloudformation/account-service
 registry = 713541911133.dkr.ecr.us-east-1.amazonaws.com
 version ?= latest
 
 binary:
 	$(call blue, "Building Linux binary ready for containerisation...")
-	docker run --rm -it -v "${GOPATH}":/gopath -v "$(CURDIR)":/app -e "GOPATH=/gopath" -w /app golang:1.10 sh -c 'go get -u -v github.com/gin-gonic/gin && CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o app'
+	docker run --rm -it -v "${GOPATH}":/gopath -v "$(CURDIR)":/app -e "GOPATH=/gopath" -w /app golang:1.10 sh -c 'go get -u -v github.com/gin-gonic/gin github.com/satori/go.uuid && CGO_ENABLED=0 go build -a --installsuffix cgo --ldflags="-s" -o app'
 
 image: binary
 	$(call blue, "Building docker image...")
@@ -23,7 +23,7 @@ image: binary
 
 run: image
 	$(call blue, "Running Docker image locally...")
-	docker run -i -t --rm -p 8000:8000 ${name}:${version}
+	docker run -i -t --rm -p 8001:8001 ${name}:${version}
 
 publish:
 	$(call blue, "Publishing Docker image to registry...")
